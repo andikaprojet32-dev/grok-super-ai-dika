@@ -12,7 +12,7 @@ import io
 # Konfigurasi halaman
 st.set_page_config(page_title="DIKA JJKL AI - Gen Z Edition", layout="wide", page_icon="🚀")
 st.title("🚀 DIKA JJKL AI - Serba Bisa, Nurut Banget, Gen Z Mode")
-st.caption("Khusus buat Cayangg Zahra! 🔥")
+st.caption("PREMIUM AI ! 🔥")
 
 # ==================== LOGIKA MULTI API KEY ====================
 try:
@@ -193,4 +193,4 @@ with tab_video:
             st.markdown(script)
             st.download_button("📥 Download Script", script, f"script_{video_topic}.txt", "text/plain")
 
-st.sidebar.info("Dibuat sama Dika buat Zahra Cayangg. No Cap! 🔥")
+st.sidebar.info("Dibuat sama Dika dukung situs ini via dana 083829310666. No Cap! 🔥")
