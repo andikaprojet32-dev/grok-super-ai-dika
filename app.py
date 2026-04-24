@@ -8,205 +8,193 @@ import requests
 from bs4 import BeautifulSoup
 import io
 
-# Konfigurasi halaman
-st.set_page_config(page_title="DIKA AI - Clean Edition", layout="wide", page_icon="✨")
+# Konfigurasi Halaman Utama
+st.set_page_config(page_title="DIKA SUPER AI", layout="wide", page_icon="⚡")
 
-# ==================== KODE CUSTOM CSS (CLEAN & MINIMALIST) ====================
+# ==================== CSS UNTUK TAMPILAN CLEAN PREMIUM ====================
 st.markdown("""
 <style>
-/* Styling Header biar modern & rapi */
-.main-header {
-    font-size: 42px !important;
-    font-weight: 800 !important;
-    background: -webkit-linear-gradient(45deg, #4A90E2, #9013FE);
+.main-title {
+    font-size: 45px !important;
+    font-weight: 900 !important;
+    background: -webkit-linear-gradient(45deg, #2193b0, #6dd5ed);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
-    padding-bottom: 0px;
-    margin-bottom: -15px;
+    margin-bottom: -10px;
 }
-.sub-header {
+.sub-title {
     text-align: center;
-    color: #888888;
-    font-size: 16px;
+    color: #555555;
+    font-size: 18px;
     margin-bottom: 30px;
-    letter-spacing: 1px;
+    font-weight: 500;
 }
-
-/* Styling Tombol biar smooth dan elegan */
 div.stButton > button {
-    border-radius: 8px !important;
-    border: 1px solid #4A90E2 !important;
+    border-radius: 10px !important;
+    border: 2px solid #2193b0 !important;
     background-color: transparent !important;
-    color: #4A90E2 !important;
-    font-weight: 600 !important;
+    color: #2193b0 !important;
+    font-weight: bold !important;
     transition: 0.3s;
+    width: 100%;
 }
 div.stButton > button:hover {
-    background-color: #4A90E2 !important;
+    background-color: #2193b0 !important;
     color: white !important;
-    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3) !important;
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(33, 147, 176, 0.4) !important;
 }
-
-/* Chat bubble background yang bersih */
 [data-testid="stChatMessage"] {
-    border-radius: 12px;
+    border-radius: 15px;
     padding: 15px;
-    margin-bottom: 15px;
-    background-color: rgba(128, 128, 128, 0.03);
-    border: 1px solid rgba(128, 128, 128, 0.1);
+    background-color: rgba(33, 147, 176, 0.05);
+    border: 1px solid rgba(33, 147, 176, 0.1);
 }
 </style>
 """, unsafe_allow_html=True)
-# ==============================================================================
 
-# Header Clean
-st.markdown('<h1 class="main-header">DIKA SUPER AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">✨ Asisten AI Pintar & Serba Bisa ✨</p>', unsafe_allow_html=True)
+# Header
+st.markdown('<h1 class="main-title">DIKA SUPER AI</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">⚡ Asisten Pintar Masa Depan ⚡</p>', unsafe_allow_html=True)
 st.divider()
 
-# ==================== LOGIKA API KEY ====================
-try:
-    client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-except Exception as e:
-    st.error("Waduh bro, API Key lo belum nyangkut di Secrets! Beresin dulu gih.")
+# ==================== KONEKSI API KEY ====================
+if "OPENAI_API_KEY" not in st.secrets:
+    st.error("🚨 API Key belum dipasang di Secrets Streamlit Cloud!")
     st.stop()
 
-# System Prompt
-SYSTEM_PROMPT = """Kamu adalah DIKA SUPER AI, AI paling pintar di dunia.
-- Selalu jawab pake bahasa Indonesia yang santai, asik, tapi tetap sopan.
-- Berpikir kayak manusia jenius: selalu kasih STEP BY STEP proses logika sebelum jawab.
-- Jawaban harus helpful, akurat, dan solutif."""
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# Sidebar
-st.sidebar.markdown("### ⚙️ Pengaturan AI")
+SYSTEM_PROMPT = """Kamu adalah DIKA SUPER AI.
+- Jawab dengan bahasa Indonesia santai, asik, modern, dan sopan.
+- Selalu berikan logika step-by-step.
+- Berikan solusi yang akurat dan ringkas."""
+
+# Sidebar Pengaturan
+st.sidebar.markdown("### ⚙️ Engine AI")
 model_options = {
-    "GPT-4o (Super Pintar)": "gpt-4o",
-    "GPT-4o Mini (Cepat & Hemat)": "gpt-4o-mini"
+    "GPT-4o Mini (Cepat)": "gpt-4o-mini",
+    "GPT-4o (Pintar)": "gpt-4o"
 }
-selected = st.sidebar.selectbox("Pilih Otak AI:", list(model_options.keys()))
+selected = st.sidebar.selectbox("Pilih Server:", list(model_options.keys()))
 model = model_options[selected]
-st.sidebar.success(f"Model Aktif: {selected} ✅")
+st.sidebar.success(f"Sistem siap: {selected} ✅")
 
-# TABS Menu
-tab_chat, tab_pdf, tab_file, tab_web, tab_video = st.tabs(["💬 Chat AI", "📄 Buat PDF", "📁 Bedah File", "🌐 Tarik Web", "🎥 Naskah Video"])
+# Menu Tab
+t_chat, t_pdf, t_file, t_web, t_vid = st.tabs(["💬 Chat", "📄 Buat PDF", "📁 Analisis File", "🌐 Tarik Web", "🎥 Ide Video"])
 
-# ==================== TAB CHAT (CLEAN UI) ====================
-with tab_chat:
+# ==================== TAB CHAT ====================
+with t_chat:
     if "messages" not in st.session_state:
         st.session_state.messages = []
-        st.toast('AI siap bantu bro! Gass nanya 🚀')
+        st.toast('Sistem siap bantu, ketik aja! ⚡')
 
-    chat_area = st.container()
+    chat_box = st.container()
 
-    if prompt := st.chat_input("Tanya apa aja, pasti dijawab..."):
+    if prompt := st.chat_input("Tanya apa aja..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        with chat_area:
+        with chat_box:
             with st.chat_message("user"):
-                st.markdown(prompt)
+                st.write(prompt)
 
             with st.chat_message("assistant"):
-                with st.spinner("🤖 AI lagi ngetik..."):
+                with st.spinner("Mikir bentar..."):
                     try:
-                        response = client.chat.completions.create(
+                        res = client.chat.completions.create(
                             model=model,
                             messages=[{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages,
                             temperature=0.7
                         )
-                        answer = response.choices[0].message.content
-                        st.markdown(answer)
+                        answer = res.choices[0].message.content
+                        st.write(answer)
                         st.session_state.messages.append({"role": "assistant", "content": answer})
                     except Exception as e:
-                        if "RateLimitError" in str(type(e)):
-                            st.warning("⚠️ Limit API habis atau saldo kosong bro. Cek dashboard OpenAI ya!")
+                        if "AuthenticationError" in str(type(e)):
+                            st.error("🚨 API Key lo MATI/DIBLOKIR sama OpenAI karena bocor di internet. Ganti key baru!")
+                        elif "RateLimitError" in str(type(e)):
+                            st.warning("⚠️ Kuota API habis atau akun belum diisi saldo ($).")
                         else:
-                            st.error(f"⚠️ Error server: {e}")
-    
-    # Mode Clean: Cuma nampilin chat terakhir biar gak numpuk
+                            st.error(f"Error sistem: {e}")
+                            
     elif len(st.session_state.messages) > 0:
-        with chat_area:
+        with chat_box:
             for msg in st.session_state.messages[-2:]:
                 with st.chat_message(msg["role"]):
-                    st.markdown(msg["content"])
+                    st.write(msg["content"])
 
 # ==================== TAB PDF ====================
-with tab_pdf:
-    st.subheader("📄 Bikin PDF Instan")
-    content = st.text_area("Masukkan teks buat dokumen PDF lo:", height=200)
-    name = st.text_input("Nama file (jangan lupa .pdf):", "dokumen_dika.pdf")
-    if st.button("Cetak PDF"):
-        if content:
+with t_pdf:
+    teks = st.text_area("Teks untuk PDF:", height=150)
+    nama = st.text_input("Nama file:", "Dika_Dokumen.pdf")
+    if st.button("Buat PDF"):
+        if teks:
             pdf = FPDF()
             pdf.add_page()
             pdf.set_font("Arial", size=12)
-            pdf.multi_cell(0, 10, content)
+            pdf.multi_cell(0, 10, teks)
             out = pdf.output(dest="S").encode("latin-1")
-            st.download_button("📥 Simpan File", out, name, "application/pdf")
-        else: st.warning("Isi teksnya dulu bro, masa kosong!")
+            st.download_button("📥 Download File", out, nama, "application/pdf")
+        else:
+            st.warning("Isi teksnya dulu!")
 
 # ==================== TAB FILE ====================
-with tab_file:
-    st.subheader("📁 Bedah Isi File")
-    up = st.file_uploader("Upload PDF, TXT, atau Gambar:", type=["txt", "pdf", "png", "jpg", "jpeg"])
-    if up and st.button("Analisis Dokumen"):
-        with st.spinner("Membaca file..."):
+with t_file:
+    up = st.file_uploader("Upload Dokumen/Gambar:", type=["pdf", "png", "jpg", "txt"])
+    if up and st.button("Bedah File"):
+        with st.spinner("Menganalisis..."):
             try:
+                msg = "Tolong analisis file ini."
                 if up.type == "application/pdf":
-                    text = "\n".join([p.extract_text() for p in PdfReader(up).pages])
-                    msg = f"Tolong ringkas dan analisis dokumen PDF ini: {text[:10000]}"
-                else:
-                    msg = "Tolong analisis isi file ini."
+                    txt = "\n".join([p.extract_text() for p in PdfReader(up).pages])
+                    msg = f"Ringkas PDF ini: {txt[:5000]}"
                 
                 res = client.chat.completions.create(model=model, messages=[{"role":"user", "content":msg}])
-                st.markdown(res.choices[0].message.content)
-            except Exception as e:
-                st.warning("⚠️ Gagal baca file. Pastikan format bener atau cek saldo API lo.")
+                st.write(res.choices[0].message.content)
+            except:
+                st.error("Gagal baca file. Pastikan API key aktif.")
 
 # ==================== TAB WEB ====================
-with tab_web:
-    st.subheader("🌐 Tarik Data Website")
-    url = st.text_input("Link Website (harus https://...):")
-    if st.button("Tarik Info"):
+with t_web:
+    url = st.text_input("Link (https://...):")
+    if st.button("Tarik Data"):
         if url:
-            with st.spinner("Mengakses server web..."):
+            with st.spinner("Menyedot..."):
                 try:
                     r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=5)
-                    txt = BeautifulSoup(r.text, "html.parser").get_text()[:15000]
+                    txt = BeautifulSoup(r.text, "html.parser").get_text()[:8000]
                     res = client.chat.completions.create(
                         model=model, 
-                        messages=[{"role":"user", "content":f"Buat ringkasan dari isi website ini secara detail: {txt}"}]
+                        messages=[{"role":"user", "content":f"Ringkas info web ini: {txt}"}]
                     )
-                    st.success("Web berhasil ditarik!")
+                    st.success("Berhasil!")
                     st.write(res.choices[0].message.content)
-                except: st.error("Web diblokir dari luar atau saldo API limit bro!")
+                except:
+                    st.error("Gagal akses web / Limit API.")
 
 # ==================== TAB VIDEO ====================
-with tab_video:
-    st.subheader("🎥 Bikin Naskah Video Auto-Viral")
-    topic = st.text_input("Ide Video:")
-    if st.button("Tulis Naskah"):
-        with st.spinner("Merangkai kata-kata..."):
+with t_vid:
+    topik = st.text_input("Ide Konten:")
+    if st.button("Buat Naskah"):
+        with st.spinner("Nulis naskah..."):
             try:
                 res = client.chat.completions.create(
                     model=model,
-                    messages=[{"role":"user", "content":f"Buat naskah video pendek yang menarik buat sosmed tentang: {topic}"}]
+                    messages=[{"role":"user", "content":f"Buat naskah video pendek YouTube/TikTok tentang: {topik}"}]
                 )
                 st.write(res.choices[0].message.content)
             except:
-                st.warning("⚠️ Limit API nyangkut bro!")
+                st.error("Gagal. Cek API Key lo.")
 
-# Sidebar Footer
+# Footer
 st.sidebar.divider()
 st.sidebar.markdown(
     """
-    <div style='text-align: center; color: #888; font-size: 14px;'>
+    <div style='text-align: center; color: #555; font-size: 14px;'>
         <b>DIKA SUPER AI</b><br>
-        <i>Clean & Minimalist Edition</i><br>
-        <br>
-        Dukung developer via DANA:<br>
-        <b style='color: #4A90E2; font-size: 16px;'>+62 83829310666</b>
+        <span style='font-size: 12px;'>Support & Donasi DANA:</span><br>
+        <b style='color: #2193b0; font-size: 16px;'>+62 83829310666</b>
     </div>
     """, unsafe_allow_html=True
 )
