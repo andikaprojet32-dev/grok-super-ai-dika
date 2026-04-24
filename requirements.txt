@@ -1,0 +1,8 @@
+streamlit
+openai
+fpdf2
+pypdf
+Pillow
+requests
+beautifulsoup4
+lxml
