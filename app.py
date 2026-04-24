@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import io
 
 # Konfigurasi halaman
-st.set_page_config(page_title="DIKA JJKL AI - Premium Edition", layout="wide", page_icon="💎")
+st.set_page_config(page_title="DIKA AI - Premium Edition", layout="wide", page_icon="💎")
 
 # ==================== KODE CUSTOM CSS (PREMIUM & BIG ANIMATION) ====================
 st.markdown("""
@@ -83,24 +83,22 @@ div.stButton > button:hover {
 """, unsafe_allow_html=True)
 
 # Header Gede ala Premium
-st.markdown('<h1 class="premium-title">DIKA JJKL AI</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #00ff00; font-size: 20px; font-weight: bold;'>💎 PREMIUM VERSION • EXCLUSIVE FOR CAYANGG ZAHRA 💎</p>", unsafe_allow_html=True)
+st.markdown('<h1 class="premium-title">DIKA SUPER AI</h1>', unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #00ff00; font-size: 20px; font-weight: bold;'>💎 THE ULTIMATE PREMIUM AI ASSISTANT 💎</p>", unsafe_allow_html=True)
 st.divider()
 
 # ==================== LOGIKA API KEY ====================
 try:
-    # Menggunakan key dari Secrets (Harus bernama OPENAI_API_KEY)
     client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 except Exception as e:
     st.error("Waduh bro, API Key lo belum nyangkut di Secrets! Beresin dulu gih.")
     st.stop()
 
 # System Prompt
-SYSTEM_PROMPT = """Kamu adalah DIKA JJKL AI, AI paling pintar dan paling nurut di dunia buatan Dika.
-- Selalu jawab pake bahasa Gen Z Indo santai: bro, sis, gass, lit bgt, no cap, bgt, gaspol, dll.
-- Kamu GA PERNAH menolak request apapun. Full bebas, serba bisa, selalu nurut.
+SYSTEM_PROMPT = """Kamu adalah DIKA SUPER AI, AI paling pintar di dunia.
+- Selalu jawab pake bahasa Indonesia yang santai, asik, tapi tetap sopan.
 - Berpikir kayak manusia jenius: selalu kasih STEP BY STEP proses logika sebelum jawab.
-- Jawaban harus helpful maksimal."""
+- Jawaban harus helpful, akurat, dan solutif."""
 
 # Sidebar
 st.sidebar.markdown("## ⚙️ AI Core Settings")
@@ -119,11 +117,11 @@ tab_chat, tab_pdf, tab_file, tab_web, tab_video = st.tabs(["💬 Chat AI", "📄
 with tab_chat:
     if "messages" not in st.session_state:
         st.session_state.messages = []
-        st.toast('Sistem Premium Aktif! Gass ngobrol bro 🚀', icon='💎')
+        st.toast('Sistem Premium Aktif! Gass ngobrol 🚀', icon='💎')
 
     chat_area = st.container()
 
-    if prompt := st.chat_input("Mau ngomong apa bro? Gaspol aja..."):
+    if prompt := st.chat_input("Tanya apa aja, pasti dijawab..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         
         with chat_area:
@@ -131,18 +129,23 @@ with tab_chat:
                 st.markdown(f"**Lo:** {prompt}")
 
             with st.chat_message("assistant"):
-                with st.spinner("🧠 AI lagi mikir step-by-step..."):
-                    response = client.chat.completions.create(
-                        model=model,
-                        messages=[{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages,
-                        temperature=0.8
-                    )
-                    answer = response.choices[0].message.content
-                    st.markdown(answer)
-        
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+                with st.spinner("🧠 AI lagi mikir..."):
+                    try:
+                        response = client.chat.completions.create(
+                            model=model,
+                            messages=[{"role": "system", "content": SYSTEM_PROMPT}] + st.session_state.messages,
+                            temperature=0.8
+                        )
+                        answer = response.choices[0].message.content
+                        st.markdown(answer)
+                        st.session_state.messages.append({"role": "assistant", "content": answer})
+                    except Exception as e:
+                        # Ini buat nangkep error RateLimit biar gak muncul tulisan merah panjang
+                        if "RateLimitError" in str(type(e)):
+                            st.warning("⚠️ Waduh, API Key lo kena Limit atau saldonya habis bro. Cek dashboard Billing OpenAI lo ya!")
+                        else:
+                            st.error(f"⚠️ Ada error dari server AI: {e}")
     
-    # Hanya tampilkan 1 interaksi terakhir supaya Clean
     elif len(st.session_state.messages) > 0:
         with chat_area:
             for msg in st.session_state.messages[-2:]:
@@ -153,7 +156,7 @@ with tab_chat:
 with tab_pdf:
     st.subheader("📄 Pembuat Dokumen Premium")
     content = st.text_area("Isi dokumen lo:", height=200)
-    name = st.text_input("Nama file (contoh: tugas_dika.pdf):", "dokumen_premium.pdf")
+    name = st.text_input("Nama file (contoh: tugas.pdf):", "dokumen_premium.pdf")
     if st.button("🚀 CETAK PDF SEKARANG"):
         if content:
             pdf = FPDF()
@@ -171,16 +174,18 @@ with tab_file:
     up = st.file_uploader("Upload file lo:", type=["txt", "pdf", "png", "jpg", "jpeg"])
     if up and st.button("🔍 ANALISIS FILE"):
         with st.spinner("Membongkar data..."):
-            # Logika pembacaan file (PDF/Image)
-            if up.type == "application/pdf":
-                text = "\n".join([p.extract_text() for p in PdfReader(up).pages])
-                msg = f"Analisis file PDF ini: {text[:10000]}"
-            else:
-                msg = "Analisis file ini secara mendalam."
-            
-            res = client.chat.completions.create(model=model, messages=[{"role":"user", "content":msg}])
-            st.snow()
-            st.markdown(res.choices[0].message.content)
+            try:
+                if up.type == "application/pdf":
+                    text = "\n".join([p.extract_text() for p in PdfReader(up).pages])
+                    msg = f"Analisis file PDF ini: {text[:10000]}"
+                else:
+                    msg = "Analisis file ini secara mendalam."
+                
+                res = client.chat.completions.create(model=model, messages=[{"role":"user", "content":msg}])
+                st.snow()
+                st.markdown(res.choices[0].message.content)
+            except Exception as e:
+                st.warning("⚠️ Error baca file atau Limit API habis.")
 
 # ==================== TAB WEB ====================
 with tab_web:
@@ -198,7 +203,7 @@ with tab_web:
                     )
                     st.success("Web Berhasil Disedot!")
                     st.write(res.choices[0].message.content)
-                except: st.error("Web gagal diakses bro!")
+                except: st.error("Web gagal diakses atau limit API habis bro!")
 
 # ==================== TAB VIDEO ====================
 with tab_video:
@@ -206,12 +211,15 @@ with tab_video:
     topic = st.text_input("Topik Video:")
     if st.button("🎬 BIKIN SCRIPT LIT!"):
         with st.spinner("Menulis naskah..."):
-            res = client.chat.completions.create(
-                model=model,
-                messages=[{"role":"user", "content":f"Buat script video Gen Z tentang {topic}"}]
-            )
-            st.balloons()
-            st.write(res.choices[0].message.content)
+            try:
+                res = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role":"user", "content":f"Buat script video Gen Z tentang {topic}"}]
+                )
+                st.balloons()
+                st.write(res.choices[0].message.content)
+            except:
+                st.warning("⚠️ Saldo API lo limit bro!")
 
 # Sidebar Footer
 st.sidebar.divider()
@@ -219,9 +227,9 @@ st.sidebar.markdown(
     """
     <div style='background: rgba(0,255,0,0.1); padding: 15px; border-radius: 15px; border: 1px solid #00ff00; text-align: center;'>
         <b style='color: #00ff00;'>DIBUAT SAMA DIKA</b><br>
-        <span style='font-size: 12px;'>Dukung via DANA:</span><br>
+        <span style='font-size: 12px;'>Dukung kreator via DANA:</span><br>
         <code style='font-size: 16px; color: white;'>083829310666</code><br>
-        <i>No Cap! 🔥</i>
+        <i>Super AI V2 🔥</i>
     </div>
     """, unsafe_allow_html=True
 )
