@@ -12,9 +12,17 @@ import io
 # Konfigurasi halaman
 st.set_page_config(page_title="DIKA AI - Premium Edition", layout="wide", page_icon="💎")
 
-# ==================== KODE CUSTOM CSS (PREMIUM & BIG ANIMATION) ====================
+# ==================== KODE CUSTOM CSS (FONT ESTETIK & ANIMASI) ====================
 st.markdown("""
 <style>
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Righteous&display=swap');
+
+/* Ubah Font Global (Seluruh Aplikasi) */
+html, body, [class*="css"], [class*="st-"], p, span, div {
+    font-family: 'Outfit', sans-serif !important;
+}
+
 /* Background Animasi Gradasi */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29);
@@ -27,10 +35,10 @@ st.markdown("""
     100% { background-position: 0% 50%; }
 }
 
-/* Judul Gede & Glowing */
+/* Judul Gede & Glowing dengan Font Estetik */
 .premium-title {
-    font-size: 60px !important;
-    font-weight: 900 !important;
+    font-family: 'Righteous', cursive !important;
+    font-size: 65px !important;
     text-align: center;
     background: linear-gradient(to right, #00ff00, #00bfff, #00ff00);
     -webkit-background-clip: text;
@@ -38,10 +46,21 @@ st.markdown("""
     filter: drop-shadow(0 0 10px rgba(0,255,0,0.5));
     animation: title-glow 3s ease-in-out infinite;
     margin-top: -30px;
+    letter-spacing: 2px;
 }
 @keyframes title-glow {
     0%, 100% { filter: drop-shadow(0 0 10px rgba(0,255,0,0.3)); }
     50% { filter: drop-shadow(0 0 30px rgba(0,255,0,0.8)); }
+}
+
+/* Sub-judul estetik */
+.sub-title {
+    text-align: center; 
+    color: #00ff00; 
+    font-size: 22px; 
+    font-weight: 600;
+    letter-spacing: 5px;
+    text-transform: uppercase;
 }
 
 /* Glassmorphism Tabs */
@@ -56,14 +75,17 @@ st.markdown("""
 div.stButton > button {
     width: 100%;
     height: 60px;
+    font-family: 'Outfit', sans-serif !important;
     font-size: 20px !important;
-    font-weight: bold !important;
+    font-weight: 800 !important;
     background: linear-gradient(45deg, #00ff00, #008000) !important;
     color: white !important;
     border: none !important;
     border-radius: 20px !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
     box-shadow: 0 10px 20px rgba(0,0,0,0.3) !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 div.stButton > button:hover {
     transform: translateY(-5px) scale(1.02);
@@ -84,7 +106,7 @@ div.stButton > button:hover {
 
 # Header Gede ala Premium
 st.markdown('<h1 class="premium-title">DIKA SUPER AI</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #00ff00; font-size: 20px; font-weight: bold;'>💎 THE ULTIMATE PREMIUM AI ASSISTANT 💎</p>", unsafe_allow_html=True)
+st.markdown('<p class="sub-title">💎 THE ULTIMATE PREMIUM AI ASSISTANT 💎</p>', unsafe_allow_html=True)
 st.divider()
 
 # ==================== LOGIKA API KEY ====================
@@ -140,7 +162,6 @@ with tab_chat:
                         st.markdown(answer)
                         st.session_state.messages.append({"role": "assistant", "content": answer})
                     except Exception as e:
-                        # Ini buat nangkep error RateLimit biar gak muncul tulisan merah panjang
                         if "RateLimitError" in str(type(e)):
                             st.warning("⚠️ Waduh, API Key lo kena Limit atau saldonya habis bro. Cek dashboard Billing OpenAI lo ya!")
                         else:
@@ -225,10 +246,10 @@ with tab_video:
 st.sidebar.divider()
 st.sidebar.markdown(
     """
-    <div style='background: rgba(0,255,0,0.1); padding: 15px; border-radius: 15px; border: 1px solid #00ff00; text-align: center;'>
-        <b style='color: #00ff00;'>DIBUAT SAMA DIKA</b><br>
-        <span style='font-size: 12px;'>Dukung kreator via DANA:</span><br>
-        <code style='font-size: 16px; color: white;'>083829310666</code><br>
+    <div style='background: rgba(0,255,0,0.1); padding: 15px; border-radius: 15px; border: 1px solid #00ff00; text-align: center; font-family: "Outfit", sans-serif;'>
+        <b style='color: #00ff00; letter-spacing: 1px;'>DIBUAT SAMA DIKA</b><br>
+        <span style='font-size: 13px;'>Dukung kreator via DANA:</span><br>
+        <code style='font-size: 18px; color: white; font-weight: bold;'>083829310666</code><br>
         <i>Super AI V2 🔥</i>
     </div>
     """, unsafe_allow_html=True
