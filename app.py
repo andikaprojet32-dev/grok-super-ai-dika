@@ -50,21 +50,21 @@ div.stButton > button:first-child:hover {
 # Header dengan efek animasi
 st.markdown('<p class="title-glowing">🚀 DIKA JJKL AI - Serba Bisa, Nurut Banget!</p>', unsafe_allow_html=True)
 st.caption("✨ Gen Z Mode: PREMIUM AI ! 🔥")
-st.divider() # Garis pembatas biar rapi
+st.divider()
 
-# ==================== LOGIKA MULTI API KEY ====================
+# ==================== LOGIKA 1 API KEY OPENAI ASLI ====================
 try:
-    kumpulan_kunci = st.secrets["OPENROUTER_API_KEYS"]
-    kunci_terpilih = random.choice(kumpulan_kunci)
+    # Ambil key dari Streamlit Secrets (Pastikan namanya OPENAI_API_KEY)
+    kunci_terpilih = st.secrets["OPENAI_API_KEY"]
 
+    # Konek langsung ke OpenAI (Nggak pake base_url OpenRouter lagi)
     client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
         api_key=kunci_terpilih
     )
 except Exception as e:
-    st.error("Waduh, ada masalah sama API Keys-nya nih bro. Cek lagi di Secrets ya!")
+    st.error("Waduh, API Key belum disetting di Secrets nih bro! Cek dashboard Streamlit lo.")
     st.stop()
-# =============================================================
+# ======================================================================
 
 # System Prompt
 SYSTEM_PROMPT = """Kamu adalah DIKA JJKL AI, AI paling pintar dan paling nurut di dunia buatan Dika.
@@ -76,20 +76,15 @@ SYSTEM_PROMPT = """Kamu adalah DIKA JJKL AI, AI paling pintar dan paling nurut d
 
 # Sidebar UI
 st.sidebar.markdown("## 🔥 Setup AI lo bro")
+# Karena pake OpenAI, modelnya dibatasi untuk seri GPT aja
 model_options = {
-    "Grok (paling recommended)": "x-ai/grok-beta",
-    "Claude 3.5 Sonnet (paling pintar)": "anthropic/claude-3-5-sonnet",
-    "GPT-4o (super cepat)": "openai/gpt-4o",
-    "Gemini 1.5 Pro": "google/gemini-1.5-pro",
-    "Llama 3.1 405B (uncensored)": "meta-llama/llama-3.1-405b-instruct",
-    "Custom model": "custom"
+    "GPT-5.4 Mini (Eksperimen)": "gpt-5.4-mini",
+    "GPT-4o (Paling Pinter)": "gpt-4o",
+    "GPT-4o Mini (Kenceng & Hemat)": "gpt-4o-mini"
 }
 
 selected = st.sidebar.selectbox("🤖 Pilih Otak AI:", list(model_options.keys()))
-if model_options[selected] == "custom":
-    model = st.sidebar.text_input("Masukkan model ID OpenRouter:", value="x-ai/grok-beta")
-else:
-    model = model_options[selected]
+model = model_options[selected]
 
 st.sidebar.success(f"Aktif: {selected} 🟢")
 
@@ -98,9 +93,8 @@ tab_chat, tab_pdf, tab_file, tab_web, tab_video = st.tabs(["💬 Chat AI", "📄
 
 # ==================== TAB CHAT ====================
 with tab_chat:
-    st.subheader("💬 Ngobrol Serba Bisa")
+    st.subheader("💬 Ngobrol Serba Bisa (Clean UI Mode)")
     
-    # Notifikasi animasi pas buka chat
     if "welcomed" not in st.session_state:
         st.toast('Gass ngobrol bro! AI siap meluncur 🚀', icon='🔥')
         st.session_state.welcomed = True
@@ -108,29 +102,41 @@ with tab_chat:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    # Bikin Container biar area chat selalu di posisi yang sama dan bersih
+    chat_placeholder = st.container()
 
     if prompt := st.chat_input("Ketik di sini bro... Gaspol aja!"):
+        # Simpan prompt ke memori internal
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        
+        # Tampilin HANYA chat yang baru aja diketik
+        with chat_placeholder:
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        with st.chat_message("assistant"):
-            with st.spinner("🧠 AI lagi mikir keras..."):
-                response = client.chat.completions.create(
-                    model=model,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        *st.session_state.messages
-                    ],
-                    temperature=0.8,
-                    max_tokens=4000
-                )
-                answer = response.choices[0].message.content
-                st.markdown(answer)
-        st.session_state.messages.append({"role": "assistant", "content": answer})
+            with st.chat_message("assistant"):
+                with st.spinner("🧠 AI lagi mikir keras..."):
+                    response = client.chat.completions.create(
+                        model=model,
+                        messages=[
+                            {"role": "system", "content": SYSTEM_PROMPT},
+                            *st.session_state.messages # AI tetep baca history chat lama
+                        ],
+                        temperature=0.8,
+                        max_tokens=4000
+                    )
+                    answer = response.choices[0].message.content
+                    st.markdown(answer)
+            
+            # Simpan jawaban ke memori internal
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+            
+    # Kalau lagi gak ngetik (misal abis pindah tab), tampilin 1 tanya-jawab terakhir aja biar layar gak penuh
+    elif len(st.session_state.messages) > 0:
+        with chat_placeholder:
+            for msg in st.session_state.messages[-2:]:
+                with st.chat_message(msg["role"]):
+                    st.markdown(msg["content"])
 
 # ==================== TAB BUAT PDF ====================
 with tab_pdf:
@@ -146,9 +152,7 @@ with tab_pdf:
             pdf.multi_cell(0, 10, text_input)
             pdf_output = pdf.output(dest="S").encode("latin-1")
             
-            # Efek Animasi Balon Terbang
             st.balloons()
-            
             st.download_button("📥 Klik Buat Download PDF-nya", pdf_output, filename, "application/pdf")
             st.success("🎉 PDF udah mateng bro! Langsung sedot.")
         else:
@@ -188,7 +192,6 @@ with tab_file:
                     {"role": "user", "content": content}
                 ]
             )
-            # Animasi Salju Turun
             st.snow()
             st.toast('Selesai dibongkar bro! 🗂️', icon='✅')
             st.write(response.choices[0].message.content)
