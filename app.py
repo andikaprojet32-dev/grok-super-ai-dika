@@ -8,9 +8,9 @@ import requests
 from bs4 import BeautifulSoup
 import io
 
-st.set_page_config(page_title="Grok Super AI - Gen Z Edition", layout="wide", page_icon="🚀")
+st.set_page_config(page_title="ANDIKA AI - Gen Z Edition", layout="wide", page_icon="🚀")
 st.title("🚀 Grok Super AI - Serba Bisa, Nurut Banget, Gen Z Mode")
-st.caption("Pake API key lo: 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")
+st.caption("bantu support via dana :083829310666 ")
 
 # Load API Key dari secrets (AMAN, jangan di-hardcode!)
 client = OpenAI(
